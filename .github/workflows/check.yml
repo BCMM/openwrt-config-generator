@@ -32,12 +32,10 @@ jobs:
           jq -nRc '[inputs]' >> "$GITHUB_OUTPUT"
   call:
     name: Start generate job
-    runs-on: ubuntu-26.04
     needs: check
+    uses: ./.github/workflows/generate.yml
     strategy:
       matrix:
         tag: ${{ fromJson(needs.check.outputs.tags) }}
-    steps:
-      - uses: ./.github/workflows/generate.yaml
-        with:
-          tag: ${{ matrix.tag }}
+    with:
+      tag: ${{ matrix.tag }}
