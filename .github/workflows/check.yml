@@ -38,5 +38,6 @@ jobs:
     strategy:
       matrix:
         tag: ${{ fromJson(needs.check.outputs.tags) }}
+      max-parallel: 1
     with:
       tag: ${{ matrix.tag }}
