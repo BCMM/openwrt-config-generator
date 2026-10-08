@@ -38,10 +38,6 @@ jobs:
       matrix:
         tag: ${{ fromJson(needs.check.outputs.tags) }}
     steps:
-      - name: test
-        run: |
-          echo ${{ matrix.tag }}
-      # - name: generate
-      #   uses: ./.github/workflows/generate.yaml
-      #   with:
-      #     tag: ${{ matrix.tag }}
+      - uses: ./.github/workflows/generate.yaml
+        with:
+          tag: ${{ matrix.tag }}
