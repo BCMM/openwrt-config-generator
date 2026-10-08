@@ -31,7 +31,7 @@ jobs:
           comm --nocheck-order -2 -3 docker git |
           jq -nRc '[inputs]' >> "$GITHUB_OUTPUT"
   call:
-    name: Start generate job
+    name: Launch job
     needs: check
     uses: ./.github/workflows/generate.yml
     secrets: inherit
