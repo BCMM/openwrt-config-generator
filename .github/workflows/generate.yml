@@ -14,7 +14,7 @@ on:
         required: true
         type: string
 jobs:
-  Gather-Config:
+  gather-config:
     runs-on: ubuntu-26.04
     steps:
       - name: Check out config repo
@@ -30,7 +30,7 @@ jobs:
       - name: Check if tag already exists
         run: |
           if ! echo ${{ inputs.tag }} | grep -P -q "^x86-64-\d\d\.\d\d\.\d{1,2}$"; then 
-            echo "::warning title=Tag $gitTag does not match ordinary pattern:: Skipping check."
+            echo "::warning title=Unknown tag "$gitTag"::The Tag "$gitTag" does not match the normal pattern. Skipping check."
             exit 0
           fi
           echo Checking ${{ inputs.tag }}...
@@ -39,7 +39,7 @@ jobs:
             sed 's/x86-64-/v/'
           )
           if git tag | fgrep -q $gitTag; then
-            echo "::error title=Tag $gitTag is already in the repository:: This should be impossible for automated runs."
+            echo "::error title=Duplicate tag::The tag "$gitTag" is already in the repository. This should be impossible for automated runs."
             exit 1
           fi
           echo "Git tag does not yet exist. Continuing..."
@@ -84,16 +84,16 @@ jobs:
           )
           echo $child belongs after $parent
           if git diff --quiet $parent; then
-            echo "::notice title=No changes::${child} is identical to $parent. Tagging but not committing."
+            echo "::notice title=No changes::${child} is identical to ${parent}. Tagging but not committing."
             git tag $child $parent
           else
             # There are changes to handle
             # Check whether the parent tag is the latest commit
             if ! [ $(git rev-parse $parent) = $(git rev-parse HEAD) ] ; then
-              echo "::error title=Change in previous version::A change was detected in a previous version. Manual rebase may be required."
+              echo "::error title=Change in previous version::This change would be inserted in to the history prior to HEAD. Manual rebase may be required."
               exit 1
             fi
-            echo "::notice title=Committing changes::New config found in $child. Tagging and committing."
+            echo "::notice title=Committing changes::New config found in ${child}. Tagging and committing."
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add router client
