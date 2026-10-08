@@ -15,6 +15,7 @@ on:
         type: string
 jobs:
   gather-config:
+    name: Generate, tag and commit configuration from containers
     runs-on: ubuntu-26.04
     steps:
       - name: Check out config repo

@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 jobs:
   check:
+    name: Check Docker Hub for new versions of OpenWrt
     runs-on: ubuntu-26.04
     outputs:
       tags: ${{ steps.compare.outputs.tags }}
@@ -30,6 +31,7 @@ jobs:
           comm --nocheck-order -2 -3 docker git |
           jq -nRc '[inputs]' >> "$GITHUB_OUTPUT"
   call:
+    name: Start generate job
     runs-on: ubuntu-26.04
     needs: check
     strategy:
