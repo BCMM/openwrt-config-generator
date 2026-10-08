@@ -34,6 +34,7 @@ jobs:
     name: Start generate job
     needs: check
     uses: ./.github/workflows/generate.yml
+    secrets: inherit
     strategy:
       matrix:
         tag: ${{ fromJson(needs.check.outputs.tags) }}
