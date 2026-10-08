@@ -14,13 +14,13 @@ jobs:
           set -o pipefail
           git ls-remote --tags \
             https://${{ secrets.OPENWRT_CONFIG_COMMIT }}:x-oauth-basic@github.com/BCMM/default-openwrt-config.git |
-          sed -r 's|.*/v(.*)|\1|' |
+          sed -r 's|.*/v(.*)|x86-64-\1|' |
           sort -V >git
       - name: List Docker tags
         run: |
           set -o pipefail
           skopeo list-tags docker://docker.io/openwrt/rootfs |
-          jq -r '.["Tags"][] | select(.|test("^x86-64-\\d\\d\\.\\d\\d\\.\\d{1,2}$"))| sub("x86-64-";"")' |
+          jq -r '.["Tags"][] | select(.|test("^x86-64-\\d\\d\\.\\d\\d\\.\\d{1,2}$"))' |
           sort -V >docker
       - name: Compare versions
         id: compare
@@ -28,7 +28,7 @@ jobs:
           set -o pipefail
           echo -n 'tags=' >> "$GITHUB_OUTPUT"
           comm --nocheck-order -2 -3 docker git |
-          jq -nRc '[inputs] | map("x86-64-"+.)' >> "$GITHUB_OUTPUT"
+          jq -nRc '[inputs]' >> "$GITHUB_OUTPUT"
   call:
     runs-on: ubuntu-26.04
     needs: check
