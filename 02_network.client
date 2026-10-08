@@ -1,0 +1,11 @@
+#!/bin/sh
+. /lib/functions/system.sh
+. /lib/functions/uci-defaults.sh
+
+board_config_update
+
+ucidef_set_interface_lan "lan1 lan2" "dhcp"
+
+board_config_flush
+
+exit 0

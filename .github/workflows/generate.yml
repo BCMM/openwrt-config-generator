@@ -1,0 +1,106 @@
+name: Generate OpenWrt config
+concurrency:
+  group: openwrt-config-generation
+  queue: max
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+        type: string
+jobs:
+  Gather-Config:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check out config repo
+        uses: actions/checkout@v7
+        with:
+          repository: bcmm/default-openwrt-config
+          fetch-depth: 0
+          token: ${{ secrets.OPENWRT_CONFIG_COMMIT }}
+      - name: Check out tools
+        uses: actions/checkout@v7
+        with:
+          path: tools
+      - name: Check if tag already exists
+        run: |
+          if ! echo ${{ inputs.tag }} | grep -P -q "^x86-64-\d\d\.\d\d\.\d{1,2}$"; then 
+            echo "::warning title=Tag $gitTag does not match ordinary pattern:: Skipping check."
+            exit 0
+          fi
+          echo Checking ${{ inputs.tag }}...
+          gitTag=$(
+            echo ${{ inputs.tag }} |
+            sed 's/x86-64-/v/'
+          )
+          if git tag | fgrep -q $gitTag; then
+            echo "::error title=Tag $gitTag is already in the repository:: This should be impossible for automated runs."
+            exit 1
+          fi
+          echo "Git tag does not yet exist. Continuing..."
+          
+# Now, one might reasonably ask, why do `docker run` when Actions has not one
+# but two special ways that you're supposed to run containers? Well...
+#
+# You can do `uses:` on a step, but that doesn't work with `${{ inputs.tag }}`.
+#
+# You can use `${{ inputs.tag }}` with `container:`, but that's only allowed at the job level.
+# So then every step runs in the container.
+# And that includes actions/checkout.
+# And that uses node, so it mounts a copy of node in to the container.
+# But the node binary can't load unless you have glibc.
+# You can lie to GitHub by modding os-release so it says you're Alpine (the only distro without glibc, apparently).
+# That gives you a binary which *still* isn't completely static: it's picky about musl versions.
+# Works on recent OpenWrt but not old containers.
+# 
+# So basically this is much less hassle:
+      - name: Gather router config from OpenWrt container
+        run: |
+          docker run --rm -v .:/repo \
+            docker.io/openwrt/rootfs:${{ inputs.tag }} \
+            /repo/tools/config_gather.sh router
+      - name: Gather client config from OpenWrt container
+        run: |
+          docker run --rm -v .:/repo \
+            docker.io/openwrt/rootfs:${{ inputs.tag }} \
+            /repo/tools/config_gather.sh client
+      - name: Update the repo
+        run: |
+          . os-release
+          child=v${VERSION_ID}
+          # $parent is the tag that comes before $child, in version order
+          parent=$(
+            (
+              git tag
+              echo $child
+            ) |
+            sort -rV |
+            sed -n "/${child}/ {n;p;q}"
+          )
+          echo $child belongs after $parent
+          if git diff --quiet $parent; then
+            echo "::notice title=No changes::${child} is identical to $parent. Tagging but not committing."
+            git tag $child $parent
+          else
+            # There are changes to handle
+            # Check whether the parent tag is the latest commit
+            if ! [ $(git rev-parse $parent) = $(git rev-parse HEAD) ] ; then
+              echo "::error title=Change in previous version::A change was detected in a previous version. Manual rebase may be required."
+              exit 1
+            fi
+            echo "::notice title=Committing changes::New config found in $child. Tagging and committing."
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add router client
+            # Older versions do not set OPENWRT_BUILD_DATE.
+            # If necessary, we get it from the file modification date instead.
+            [ -n "$OPENWRT_BUILD_DATE" ] || OPENWRT_BUILD_DATE=$(date +%s -ros-release)
+            git commit -m "Generate config for $PRETTY_NAME" --date=@${OPENWRT_BUILD_DATE}
+            git tag $child
+          fi
+          git push origin HEAD --tags
