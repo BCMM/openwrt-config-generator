@@ -13,6 +13,7 @@ uci_apply_defaults
 
 # Collect the config
 mkdir /repo/${1}
+chmod a+x /repo/${1}
 cd /repo/${1}
 cp /etc/config/* .
 sed -i \

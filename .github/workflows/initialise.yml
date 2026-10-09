@@ -58,6 +58,8 @@ jobs:
     with:
       tag: ${{ matrix.tag }}
       branches: ${{ inputs.branch }}
+      # Contains some older release that aren't on GHCR
+      container: docker.io/openwrt/rootfs
   cleanup:
     name: Remove v0.00.0 tag
     runs-on: ubuntu-26.04

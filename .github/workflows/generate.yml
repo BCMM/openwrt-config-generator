@@ -11,12 +11,18 @@ on:
       branches:
         required: true
         type: string
+      container:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag:
         required: true
         type: string
       branches:
+        required: true
+        type: string
+      container:
         required: true
         type: string
 jobs:
@@ -73,7 +79,7 @@ jobs:
         run: |
           for branch in ${{ inputs.branches }} ; do
             docker run --rm -v .:/repo \
-              docker.io/openwrt/rootfs:${{ inputs.tag }} \
+              ${{ inputs.container }}:${{ inputs.tag }} \
               /repo/tools/config_gather.sh $branch
           done
       - name: Update the repo

@@ -65,3 +65,5 @@ jobs:
     with:
       tag: ${{ matrix.tag }}
       branches: ${{ needs.check.outputs.branches }}
+      # Hopefully less likely to rate-limit GH runners than docker.io
+      container: ghcr.io/openwrt/rootfs
