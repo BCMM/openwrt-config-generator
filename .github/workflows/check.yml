@@ -30,7 +30,7 @@ jobs:
               https://${{ secrets.OPENWRT_CONFIG_COMMIT }}:x-oauth-basic@github.com/BCMM/default-openwrt-config.git
           )
           for branch in $branches; do
-            echo $git |
+            echo "$git" |
             sed -nr "s|.*refs/tags/${branch}/(.*)|x86-64-\1|p" |
             sort -V >git.$branch
             if [ -n "$prev" ] && ! diff git.$branch git.$prev; then
