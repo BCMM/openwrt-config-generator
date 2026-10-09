@@ -10,7 +10,7 @@ I initially wanted this as a way to "check my work" when I was re-configuring an
 
 # About the repo
 
-Of course, there is no such thing as default OpenWrt config: parts of the files generated on first boot are hardware-specific. The repo contains config for a couple of simplified devices. Each top-level directory contains the contents of /etc/config/ for its respective device.
+Of course, there is no such thing as default OpenWrt config: parts of the files generated on first boot are hardware-specific. The repo contains config for a couple of simplified devices. Each branch contains the contents of /etc/config/ for its respective device.
 
 ## "router"
 
@@ -52,7 +52,7 @@ With the exception of 24.10.0, the history of stable releases should be complete
 
 ## Not strictly chronological
 
-I do not think it would be useful to have branches per series. The single branch is ordered by version number, meaning that it is not strictly chronological. For example, changes to `firewall` which, in the repo's "history", first appear in 21.02.4 were in reality first seen in OpenWrt 22.03.0. At the time of writing (after the release of 25.12.5), that is the *only* example of a released change which is shown out of chronological order.
+Each branch in the repo is ordered by version number, meaning that it is not strictly chronological. For example, changes to `firewall` which, in the repo's "history", first appear in 21.02.4 were in reality first seen in OpenWrt 22.03.0. At the time of writing (after the release of 25.12.5), that is the *only* example of a released change which is shown out of chronological order.
 
 ## Unstable hashes
 

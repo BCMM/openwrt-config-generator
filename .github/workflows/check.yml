@@ -3,20 +3,43 @@ on:
   # schedule:
   #   - cron: "12 02 * * *"
   workflow_dispatch:
+    inputs:
+      branches:
+        required: false
+        type: string
+concurrency:
+  group: check
 jobs:
   check:
     name: Check Docker Hub for new versions of OpenWrt
     runs-on: ubuntu-26.04
     outputs:
       tags: ${{ steps.compare.outputs.tags }}
+      branches: ${{ steps.passthrough.outputs.branches }}
+    env:
+      branches: ${{ inputs.branches || 'router client' }}
     steps:
+      - name: Pass input through
+        id: passthrough
+        run: echo "branches=${branches}" >> "$GITHUB_OUTPUT"
       - name: List Git tags
         run: |
           set -o pipefail
-          git ls-remote --tags \
-            https://${{ secrets.OPENWRT_CONFIG_COMMIT }}:x-oauth-basic@github.com/BCMM/default-openwrt-config.git |
-          sed -r 's|.*/v(.*)|x86-64-\1|' |
-          sort -V >git
+          git=$(
+            git ls-remote --tags \
+              https://${{ secrets.OPENWRT_CONFIG_COMMIT }}:x-oauth-basic@github.com/BCMM/default-openwrt-config.git
+          )
+          for branch in $branches; do {
+            echo $git |
+            sed -nr "s|.*refs/tags/${branch}/(.*)|x86-64-\1|p" |
+            sort -V >git.$branch
+            if [ -n "$prev" ] && ! diff git.$branch git.$prev; then
+                echo "::error title=Branches not in sync::${branch} and ${prev} do not contain the same versions."
+                exit 1
+            fi
+            $prev = $branch
+            cp git.$branch git
+          }
       - name: List Docker tags
         run: |
           set -o pipefail
@@ -41,3 +64,4 @@ jobs:
       max-parallel: 1
     with:
       tag: ${{ matrix.tag }}
+      branches: ${{ needs.check.outputs.branches }}

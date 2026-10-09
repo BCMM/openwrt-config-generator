@@ -12,6 +12,7 @@ cp /repo/tools/02_network.${1} /etc/board.d/02_network
 uci_apply_defaults
 
 # Collect the config
+mkdir /repo/${1}
 cd /repo/${1}
 cp /etc/config/* .
 sed -i \
@@ -24,4 +25,4 @@ pwd
 cp -p /etc/os-release ..
 
 # We will not be root outside the container. Make config readable by others.
-chmod a+r *
+chmod -R a+r . ../os-release

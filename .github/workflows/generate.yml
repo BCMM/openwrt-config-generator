@@ -1,6 +1,6 @@
 name: Generate OpenWrt config
 concurrency:
-  group: openwrt-config-generation
+  group: generate
   queue: max
 on:
   workflow_call:
@@ -8,9 +8,15 @@ on:
       tag:
         required: true
         type: string
+      branches:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag:
+        required: true
+        type: string
+      branches:
         required: true
         type: string
 jobs:
@@ -24,6 +30,7 @@ jobs:
           repository: bcmm/default-openwrt-config
           fetch-depth: 0
           token: ${{ secrets.OPENWRT_CONFIG_COMMIT }}
+          path: config
       - name: Check out tools
         uses: actions/checkout@v7
         with:
@@ -31,20 +38,22 @@ jobs:
       - name: Check if tag already exists
         run: |
           if ! echo ${{ inputs.tag }} | grep -P -q "^x86-64-\d\d\.\d\d\.\d{1,2}$"; then 
-            echo "::warning title=Unknown tag "$gitTag"::The Tag "$gitTag" does not match the normal pattern. Skipping check."
+            echo "::warning title=Irregular tag ${{ inputs.tag }}::The Docker tag ${{ inputs.tag }} does not match the normal pattern. Skipping dup check."
             exit 0
           fi
-          echo Checking ${{ inputs.tag }}...
-          gitTag=$(
-            echo ${{ inputs.tag }} |
-            sed 's/x86-64-/v/'
-          )
-          if git tag | fgrep -q $gitTag; then
-            echo "::error title=Duplicate tag::The tag "$gitTag" is already in the repository. This should be impossible for automated runs."
-            exit 1
-          fi
-          echo "Git tag does not yet exist. Continuing..."
-          
+          cd config
+          for branch in branches; do
+            echo Checking ${{ inputs.tag }}...
+            gitTag=$(
+              echo ${{ inputs.tag }} |
+              sed "s|x86-64-|${branch}/v|"
+            )
+            if git tag | fgrep -q $gitTag; then
+              echo "::error title=Duplicate tag::$gitTag is already tagged in the repository. This should be impossible for automated runs."
+              exit 1
+            fi
+          done
+          echo "Git tags do not yet exist. Continuing..."
 # Now, one might reasonably ask, why do `docker run` when Actions has not one
 # but two special ways that you're supposed to run containers? Well...
 #
@@ -60,48 +69,51 @@ jobs:
 # Works on recent OpenWrt but not old containers.
 # 
 # So basically this is much less hassle:
-      - name: Gather router config from OpenWrt container
+      - name: Gather config from OpenWrt containers
         run: |
-          docker run --rm -v .:/repo \
-            docker.io/openwrt/rootfs:${{ inputs.tag }} \
-            /repo/tools/config_gather.sh router
-      - name: Gather client config from OpenWrt container
-        run: |
-          docker run --rm -v .:/repo \
-            docker.io/openwrt/rootfs:${{ inputs.tag }} \
-            /repo/tools/config_gather.sh client
+          for branch in ${{ inputs.branches }} ; do
+            docker run --rm -v .:/repo \
+              docker.io/openwrt/rootfs:${{ inputs.tag }} \
+              /repo/tools/config_gather.sh $branch
+          done
       - name: Update the repo
         run: |
           . os-release
-          child=v${VERSION_ID}
-          # $parent is the tag that comes before $child, in version order
-          parent=$(
-            (
-              git tag
-              echo $child
-            ) |
-            sort -rV |
-            sed -n "/${child}/ {n;p;q}"
-          )
-          echo $child belongs after $parent
-          if git diff --quiet $parent; then
-            echo "::notice title=No changes::${child} is identical to ${parent}. Tagging but not committing."
-            git tag $child $parent
-          else
-            # There are changes to handle
-            # Check whether the parent tag is the latest commit
-            if ! [ $(git rev-parse $parent) = $(git rev-parse HEAD) ] ; then
-              echo "::error title=Change in previous version::This change would be inserted in to the history prior to HEAD. Manual rebase may be required."
-              exit 1
+          cd config
+          for branch in ${{ inputs.branches }} ; do
+            # $parent is the tag that comes before $child, in version order
+            child="${branch}/v${VERSION_ID}"
+            parent=$(
+              (
+                git tag | grep -F "${branch}/"
+                echo $child
+              ) |
+              sort -rV |
+              sed -n "/${branch}\/v${VERSION_ID}/ {n;p;q}"
+            )
+            echo $child belongs after $parent
+            git checkout $branch
+            cp ../${branch}/* .
+            git add .
+            if git diff --quiet $parent; then 
+              echo "::notice title=No changes::${child} is identical to ${parent}. Tagging but not committing."
+              git tag $child $parent
+            else
+              # There are changes to handle
+              # Check whether the parent tag is the latest commit
+              if ! [ $(git rev-parse $parent) = $(git rev-parse HEAD) ] ; then
+                echo "::error title=Change in previous version::Changes for $child would be inserted in to the history prior to HEAD. Manual rebase may be required."
+                exit 1
+              fi
+              echo "::notice title=Committing changes::New config found in ${child}. Tagging and committing."
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add .
+              # Older versions do not set OPENWRT_BUILD_DATE.
+              # If necessary, we get it from the file modification date instead.
+              [ -n "$OPENWRT_BUILD_DATE" ] || OPENWRT_BUILD_DATE=$(date +%s -r../os-release)
+              git commit -m "Generate $branch config for $PRETTY_NAME" --date=@${OPENWRT_BUILD_DATE}
+              git tag $child
             fi
-            echo "::notice title=Committing changes::New config found in ${child}. Tagging and committing."
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add router client
-            # Older versions do not set OPENWRT_BUILD_DATE.
-            # If necessary, we get it from the file modification date instead.
-            [ -n "$OPENWRT_BUILD_DATE" ] || OPENWRT_BUILD_DATE=$(date +%s -ros-release)
-            git commit -m "Generate config for $PRETTY_NAME" --date=@${OPENWRT_BUILD_DATE}
-            git tag $child
-          fi
-          git push origin HEAD --tags
+            git push origin ${{ inputs.branches }} --tags
+          done

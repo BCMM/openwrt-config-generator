@@ -1,0 +1,72 @@
+name: Initialise a new branch
+concurrency:
+  group: check
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        required: true
+        type: string
+jobs:
+  init-branch:
+    name: Create a branch and process fiddly early history
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+        with:
+          repository: bcmm/default-openwrt-config
+          token: ${{ secrets.OPENWRT_CONFIG_COMMIT }}
+          fetch-depth: 0
+      - name: Check if branch already exists
+        run: |
+          if git show-ref --verify --quiet refs/heads/${{ inputs.branch }} ; then 
+            echo "::error title=Duplicate branch::The branch ${{ inputs.branch }} already exists."
+            exit 1
+          fi
+      - name: Create and push branch
+        run: |
+          first=$(git rev-list --max-parents=0 HEAD)
+          git checkout $first
+          git switch -c ${{ inputs.branch }}
+          git tag ${{ inputs.branch }}/v0.00.0
+          git push origin ${{ inputs.branch }} ${{ inputs.branch }}/v0.00.0
+  call:
+    name: Launch job
+    needs: init-branch
+    uses: ./.github/workflows/generate.yml
+    secrets: inherit
+    strategy:
+      matrix:
+        tag:
+          - x86-64-18.06.9
+          - x86-64-19.07.7
+          - x86-64-19.07.8
+          - x86-64-19.07.9
+          - x86-64-19.07.10
+          - x86-64-21.02.0
+          - x86-64-21.02.1
+          - x86-64-21.02.2
+          - x86-64-21.02.3
+          - x86-64-v21.02.4
+          - x86-64-21.02.5
+          - x86-64-v21.02.6
+          - x86-64-21.02.7
+          - x86-64-22.03.0
+          - x86-64-v22.03.1
+      max-parallel: 1
+    with:
+      tag: ${{ matrix.tag }}
+      branches: ${{ inputs.branch }}
+  cleanup:
+    name: Remove v0.00.0 tag
+    runs-on: ubuntu-26.04
+    needs: call
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+        with:
+          repository: bcmm/default-openwrt-config
+          token: ${{ secrets.OPENWRT_CONFIG_COMMIT }}
+      - name:
+        run: git push --delete origin ${{ inputs.branch }}/v0.00.0
