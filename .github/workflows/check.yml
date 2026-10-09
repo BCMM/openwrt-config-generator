@@ -11,7 +11,7 @@ concurrency:
   group: check
 jobs:
   check:
-    name: Check GHCRfor new versions of OpenWrt
+    name: Check GHCR for new versions of OpenWrt
     runs-on: ubuntu-26.04
     outputs:
       tags: ${{ steps.compare.outputs.tags }}
@@ -29,7 +29,7 @@ jobs:
             git ls-remote --tags \
               https://${{ secrets.OPENWRT_CONFIG_COMMIT }}:x-oauth-basic@github.com/BCMM/default-openwrt-config.git
           )
-          for branch in $branches; do {
+          for branch in $branches; do
             echo $git |
             sed -nr "s|.*refs/tags/${branch}/(.*)|x86-64-\1|p" |
             sort -V >git.$branch
@@ -39,7 +39,7 @@ jobs:
             fi
             $prev = $branch
             cp git.$branch git
-          }
+          done
       - name: List Docker tags
         run: |
           set -o pipefail
