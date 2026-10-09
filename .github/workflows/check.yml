@@ -11,7 +11,7 @@ concurrency:
   group: check
 jobs:
   check:
-    name: Check Docker Hub for new versions of OpenWrt
+    name: Check GHCRfor new versions of OpenWrt
     runs-on: ubuntu-26.04
     outputs:
       tags: ${{ steps.compare.outputs.tags }}
@@ -43,7 +43,7 @@ jobs:
       - name: List Docker tags
         run: |
           set -o pipefail
-          skopeo list-tags docker://docker.io/openwrt/rootfs |
+          skopeo list-tags docker://ghcr.io/openwrt/rootfs |
           jq -r '.["Tags"][] | select(.|test("^x86-64-\\d\\d\\.\\d\\d\\.\\d{1,2}$"))' |
           sort -V >docker
       - name: Compare versions
