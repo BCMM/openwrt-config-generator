@@ -13,7 +13,6 @@ uci_apply_defaults
 
 # Collect the config
 mkdir /repo/${1}
-chmod a+x /repo/${1}
 cd /repo/${1}
 cp /etc/config/* .
 sed -i \
@@ -26,4 +25,5 @@ pwd
 cp -p /etc/os-release ..
 
 # We will not be root outside the container. Make config readable by others.
+chmod a+x .
 chmod -R a+r . ../os-release
