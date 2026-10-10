@@ -1,12 +1,12 @@
 # OpenWrt default config generator
 
-This repo contains documentation and GitHub workflows for https://github.com/BCMM/default-openwrt-config. That repo contains examples of default OpenWrt /etc/config/* files for typical "router" and "client" devices.
+This repo contains documentation and GitHub workflows for https://github.com/BCMM/default-openwrt-config. That repo contains examples of default OpenWrt `/etc/config/*` files for typical "router" and "client" devices.
 
 # Rationale
 
-I wanted to see the default contents of OpenWrt's /etc/config/. At first glance it seems like one can get this from /rom/etc/config/ or by browsing OpenWrt's source code, but such approaches are of limited use because some important files are generated on first boot, not at build time.
+I wanted to see the default contents of OpenWrt's `/etc/config/`. At first glance it seems like one can get this from `/rom/etc/config/` or by browsing OpenWrt's source code, but such approaches are of limited use because some important files are generated on first boot, not at build time.
 
-I initially wanted this as a way to "check my work" when I was re-configuring an AP to act as a router. It may also be useful when migrating config between releases, since the commit history shows how the defaults have changed over time.
+I initially wanted this as a way to check my work when I was re-configuring an AP to act as a router. It may also be useful when migrating config between releases, since the commit history shows how the defaults have changed over time.
 
 # About the repo
 
@@ -29,7 +29,7 @@ Many OpenWrt builds for Wi-Fi APs, managed switches and NAS appliances have diff
 | Prepare | `git clone https://github.com/BCMM/default-openwrt-config.git`<br>`cd default-openwrt-config` | N/A |
 | Compare router to client | `git diff origin/client` | [Link](https://github.com/BCMM/default-openwrt-config/compare/router..client) |
 | Compare two releases | `git diff router/v22.03.0 router/v24.10.8`  | [Link](https://github.com/BCMM/default-openwrt-config/compare/router/v22.03.0..router/v24.10.8) |
-| Compare to your real router | `git checkout router/vNN.NN.N # Skip if using latest release`<br>`scp -O -r root@openwrt:/etc/config/*`<br>`git diff`  | N/A |
+| Compare to your real router | `git checkout router/vNN.NN.N # Skip if using latest release`<br>`scp -O -r root@openwrt:/etc/config/*`<br>`git diff` | N/A |
 
 There will always be some changes between the repo and a real router's config, even if you haven't changed anything yet. However, uninteresting changes are few enough that one can look past them, and I think this works well as a "what am I missing?" check.
 
