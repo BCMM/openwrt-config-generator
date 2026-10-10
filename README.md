@@ -61,6 +61,8 @@ If you wish to examine changes to such a copy of `firewall`, either grab a norma
 
 or compare it to your default copy from `/rom/etc/config/firewall`.
 
+This issue also affects `dropbear`, `attendedsysupgrade` and `rpcd`. As the default contents are short, I have decided *not* to normalise these files.
+
 ## I don't know how swconfig works
 
 Most routers feature a built-in switch. The /etc/config/network generated for the repo does not represent the way switches work on non-DSA targets. It looks more like a device with two or three independent NICs (which *is* an accurate model for some popular SBCs).
