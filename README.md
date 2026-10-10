@@ -73,7 +73,7 @@ This repo is only aware of releases which have [official images on Docker Hub](h
 - 19.07.0 to 19.07.6
 - 24.10.0
 
-With the exception of 24.10.0, the history of stable releases should be complete from 19.07.7 onwards. This project does not attempt to track snapshots or release candidates.
+With the exception of 24.10.0, the history of stable releases should be complete from 19.07.7 onward. This project does not attempt to track snapshots or release candidates.
 
 ## Not strictly chronological
 
@@ -92,3 +92,9 @@ instead of
 https://github.com/BCMM/default-openwrt-config/blob/874b0f2e050cf9f9eca99adc39ea4a4801cacad4/dhcp
 
 Since such changes have, so far, been uncommon, I do not expect that this will happen often. Most OpenWrt releases will not trigger config changes, and will be handled by adding additional tags to existing commits.
+
+# Help wanted
+
+Does anybody know how to make something that looks like an swconfig device?
+
+Does anybody know of a way to automatically trigger a workflow when OpenWrt publishes a new image? Github's `schedule:` events seem to be a bit intermittent.
