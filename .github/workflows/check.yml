@@ -31,7 +31,7 @@ jobs:
           )
           for branch in $branches; do
             echo "$git" |
-            sed -nr "s|.*refs/tags/${branch}/(.*)|x86-64-\1|p" |
+            sed -nr "s|.*refs/tags/${branch}/v(.*)|x86-64-\1|p" |
             sort -V >git.$branch
             if [ -n "$prev" ] && ! diff git.$branch git.$prev; then
                 echo "::error title=Branches not in sync::${branch} and ${prev} do not contain the same versions."
