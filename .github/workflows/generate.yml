@@ -48,7 +48,7 @@ jobs:
             exit 0
           fi
           cd config
-          for branch in branches; do
+          for branch in ${{ inputs.branches }}; do
             echo Checking ${{ inputs.tag }}...
             gitTag=$(
               echo ${{ inputs.tag }} |
