@@ -1,6 +1,6 @@
 # OpenWrt default config generator
 
-This repo contains documentation and GitHub workflows for https://github.com/BCMM/default-openwrt-config, which contain examples of default OpenWrt /etc/config/* files for typical "router" and "client" devices.
+This repo contains documentation and GitHub workflows for https://github.com/BCMM/default-openwrt-config. That repo contains examples of default OpenWrt /etc/config/* files for typical "router" and "client" devices.
 
 # Rationale
 
@@ -21,6 +21,17 @@ This device represent a generic OpenWrt router. It has one WAN port (`wan`) and 
 This device represents any other type of OpenWrt box. It has two LAN ports only (`lan1 lan2`).
 
 Many OpenWrt builds for Wi-Fi APs, managed switches and NAS appliances have different defaults from router builds. They have no WAN interface, and on the LAN interface, they act as DHCP clients instead of servers.
+
+# Example usage
+
+| Task | Local | Online |
+| ---- | ----- | ------ |
+| Prepare | `git clone https://github.com/BCMM/default-openwrt-config.git && cd default-openwrt-config` | N/A |
+| Compare router and client config | `git diff origin/client` | [Link](https://github.com/BCMM/default-openwrt-config/compare/router..client) |
+| Compare two versions of OpenWrt | `git diff router/v22.03.0 router/v24.10.8`  | [Link](https://github.com/BCMM/default-openwrt-config/compare/router/v22.03.0..router/v24.10.8) |
+| Compare defaults to your real router | `scp -O -r root@openwrt:/etc/config/* . && git diff`  | N/A |
+
+There will always be some changes between the repo and a real router's config, even if you haven't changed anything yet. However, uninteresting changes are few enough that one can look past them, and I think this works well as a "what am I missing?" check.
 
 # Notes on history
 
