@@ -15,6 +15,8 @@ uci_apply_defaults
 mkdir /repo/${1}
 cd /repo/${1}
 cp /etc/config/* .
+# Overwrite firewall with processed version to retain comparability
+uci export firewall | tail -n +2 > firewall
 sed -i \
   -e "s/option dhcp_default_duid .*/option dhcp_default_duid '[expunged]'/" \
   -e "s/option ula_prefix .*/option ula_prefix '[expunged]'/" \
