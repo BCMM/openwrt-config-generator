@@ -29,7 +29,9 @@ Many OpenWrt builds for Wi-Fi APs, managed switches and NAS appliances have diff
 | Prepare | `git clone https://github.com/BCMM/default-openwrt-config.git`<br>`cd default-openwrt-config` | N/A |
 | Compare router to client | `git diff origin/client` | [Link](https://github.com/BCMM/default-openwrt-config/compare/router..client) |
 | Compare two releases | `git diff router/v22.03.0 router/v24.10.8`  | [Link](https://github.com/BCMM/default-openwrt-config/compare/router/v22.03.0..router/v24.10.8) |
-| Compare to your real router | `git checkout router/vNN.NN.N # Skip if using latest release`<br>`scp -O -r root@openwrt:/etc/config/*`<br>`git diff` | N/A |
+| Compare to your real router | `git checkout router/vNN.NN.N # Skip if using latest release`<br>`scp -O -r root@openwrt:/etc/config/* .`<br>`git diff` | N/A |
+
+Or `git diftool -d`, if you have a favourite diff GUI.
 
 There will always be some changes between the repo and a real router's config, even if you haven't changed anything yet. However, uninteresting changes are few enough that one can look past them, and I think this works well as a "what am I missing?" check.
 
