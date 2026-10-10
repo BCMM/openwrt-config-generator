@@ -121,5 +121,5 @@ jobs:
               git commit -m "Generate $branch config for $PRETTY_NAME" --date=@${OPENWRT_BUILD_DATE}
               git tag $child
             fi
-            git push origin ${{ inputs.branches }} --tags
+            git push origin 'refs/heads/*' --tags
           done
