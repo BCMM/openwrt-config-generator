@@ -22,6 +22,10 @@ This device represents any other type of OpenWrt box. It has two LAN ports only 
 
 Many OpenWrt builds for Wi-Fi APs, managed switches and NAS appliances have different defaults from router builds. They have no WAN interface, and on the LAN interface, they act as DHCP clients instead of servers.
 
+## Randomly-generated values
+
+You will find the value `'[expunged]'` in a couple of places. Those values are randomly generated on first boot and have been censored to avoid spurious config changes in every single version.
+
 # Example usage
 
 | Task | Local | Online |
