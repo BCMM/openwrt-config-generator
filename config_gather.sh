@@ -11,10 +11,8 @@ cp /repo/tools/02_network.${1} /etc/board.d/02_network
 . /etc/init.d/boot
 uci_apply_defaults
 
-# Re-write firewall config, for comparability
-uci set firewall.dummy_section=dummy
-uci del firewall.dummy_section
-uci commit
+# Export normalised config
+uci export > /etc/config/uci_export
 
 # Collect the config
 mkdir /repo/${1}
