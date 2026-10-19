@@ -11,6 +11,12 @@ cp /repo/tools/02_network.${1} /etc/board.d/02_network
 . /etc/init.d/boot
 uci_apply_defaults
 
+# Clear randomly-generated values
+sed -i \
+  -e "s/option dhcp_default_duid .*/option dhcp_default_duid '[expunged]'/" \
+  -e "s/option ula_prefix .*/option ula_prefix '[expunged]'/" \
+  /etc/config/network
+
 # Export normalised config
 uci export > /etc/config/uci_export
 
@@ -18,10 +24,6 @@ uci export > /etc/config/uci_export
 mkdir /repo/${1}
 cd /repo/${1}
 cp /etc/config/* .
-sed -i \
-  -e "s/option dhcp_default_duid .*/option dhcp_default_duid '[expunged]'/" \
-  -e "s/option ula_prefix .*/option ula_prefix '[expunged]'/" \
-  network
 
 # Collect version number and build date
 pwd
