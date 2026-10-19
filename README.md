@@ -34,7 +34,7 @@ You will find the value `'[expunged]'` in a couple of places. Those values are r
 | Compare router to client | `git diff origin/client` | [Link](https://github.com/BCMM/default-openwrt-config/compare/router..client) |
 | Compare two releases | `git diff router/v22.03.0 router/v24.10.8`  | [Link](https://github.com/BCMM/default-openwrt-config/compare/router/v22.03.0..router/v24.10.8) |
 | Compare to your real router | `git checkout router/vNN.NN.N # Skip if using latest release`<br>`scp -O -r root@openwrt:/etc/config/* .`<br>`git diff` | N/A |
-| As above, but [normalised](#Comparibility-of-files-modified-by-uci) | `ssh root@openwrt uci export > uci_export`<br>`git diff` | N/A |
+| As above, but [normalised](#Comparibility-of-files-modified-by-uci) |  `git checkout router/vNN.NN.N # Skip if using latest release`<br>`ssh root@openwrt uci export > uci_export`<br>`git diff` | N/A |
 
 Or `git diftool -d`, if you have a favourite diff GUI.
 
