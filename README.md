@@ -92,7 +92,7 @@ https://github.com/BCMM/default-openwrt-config/blob/router/v25.12.5/dhcp
 
 instead of
 
-https://github.com/BCMM/default-openwrt-config/blob/874b0f2e050cf9f9eca99adc39ea4a4801cacad4/dhcp
+https://github.com/BCMM/default-openwrt-config/blob/496760beaefe918723aa377a96d6a13caede1aa2/dhcp
 
 Since such changes have, so far, been uncommon, I do not expect that this will happen often. Most OpenWrt releases will not trigger config changes, and will be handled by adding additional tags to existing commits.
 
